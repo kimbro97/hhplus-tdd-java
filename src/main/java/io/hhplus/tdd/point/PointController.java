@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.hhplus.tdd.point.request.AmountRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -47,9 +48,9 @@ public class PointController {
 	@PatchMapping("{id}/charge")
 	public UserPoint charge(
 		@PathVariable long id,
-		@RequestBody long amount
+		@RequestBody AmountRequest request
 	) {
-		return pointService.chargePoint(id, amount);
+		return pointService.chargePoint(id, request.amount());
 	}
 
 	/**
@@ -58,8 +59,8 @@ public class PointController {
 	@PatchMapping("{id}/use")
 	public UserPoint use(
 		@PathVariable long id,
-		@RequestBody long amount
+		@RequestBody AmountRequest request
 	) {
-		return pointService.usePoint(id, amount);
+		return pointService.usePoint(id, request.amount());
 	}
 }
