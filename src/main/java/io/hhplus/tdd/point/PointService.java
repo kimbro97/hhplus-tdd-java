@@ -27,11 +27,24 @@ public class PointService {
 
 		UserPoint userPoint = userPointTable.selectById(userId);
 
-		userPoint.validate(amount);
+		userPoint.chargeValidate(amount);
 
 		userPoint = userPointTable.insertOrUpdate(userId, amount);
 
 		pointHistoryTable.insert(userId, amount, TransactionType.CHARGE, System.currentTimeMillis());
+
+		return userPoint;
+	}
+
+	public UserPoint usePoint(long userId, long amount) {
+
+		UserPoint userPoint = userPointTable.selectById(userId);
+
+		userPoint.useValidate(amount);
+
+		userPoint = userPointTable.insertOrUpdate(userId, amount);
+
+		pointHistoryTable.insert(userId, amount, TransactionType.USE, System.currentTimeMillis());
 
 		return userPoint;
 	}
