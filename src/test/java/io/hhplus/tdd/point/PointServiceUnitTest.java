@@ -50,6 +50,38 @@ class PointServiceUnitTest {
 
 	}
 
+	@Test
+	void charge_point_success() {
+		// arrange
+		when(userPointTable.selectById(1L))
+			.thenReturn(new UserPoint(1, 3000, System.currentTimeMillis()));
+
+		when(userPointTable.insertOrUpdate(1L, 7000))
+			.thenReturn(new UserPoint(1, 7000, System.currentTimeMillis()));
+
+		// act
+		UserPoint userPoint = pointService.chargePoint(1L, 4000);
+
+		// assert
+		assertThat(userPoint.point()).isEqualTo(7000);
+	}
+
+	@Test
+	void use_point_success() {
+		// arrange
+		when(userPointTable.selectById(1L))
+			.thenReturn(new UserPoint(1, 3000, System.currentTimeMillis()));
+
+		when(userPointTable.insertOrUpdate(1L, 1000))
+			.thenReturn(new UserPoint(1, 1000, System.currentTimeMillis()));
+
+		// act
+		UserPoint userPoint = pointService.usePoint(1L, 2000);
+
+		// assert
+		assertThat(userPoint.point()).isEqualTo(1000);
+	}
+
 	private List<PointHistory> createPointHistoryList() {
 		return List.of(
 			new PointHistory(1, 1, 3000, TransactionType.CHARGE, System.currentTimeMillis()),
