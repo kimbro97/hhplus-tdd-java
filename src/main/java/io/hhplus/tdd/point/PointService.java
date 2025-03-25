@@ -29,7 +29,7 @@ public class PointService {
 
 		userPoint.chargeValidate(amount);
 
-		userPoint = userPointTable.insertOrUpdate(userId, amount);
+		userPoint = userPointTable.insertOrUpdate(userId, userPoint.increasePoint(amount));
 
 		pointHistoryTable.insert(userId, amount, TransactionType.CHARGE, System.currentTimeMillis());
 
@@ -42,7 +42,7 @@ public class PointService {
 
 		userPoint.useValidate(amount);
 
-		userPoint = userPointTable.insertOrUpdate(userId, amount);
+		userPoint = userPointTable.insertOrUpdate(userId, userPoint.decreasePoint(amount));
 
 		pointHistoryTable.insert(userId, amount, TransactionType.USE, System.currentTimeMillis());
 

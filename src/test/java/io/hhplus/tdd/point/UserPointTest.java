@@ -49,4 +49,18 @@ class UserPointTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("보유 포인트가 부족합니다.");
 	}
+
+	@Test
+	void 포인트를_증가시킬_수_있다() {
+		UserPoint userPoint = new UserPoint(1, 3000, System.currentTimeMillis());
+		long amount = userPoint.increasePoint(1000);
+		assertThat(amount).isEqualTo(4000);
+	}
+
+	@Test
+	void 포인트를_감소시킬_수_있다() {
+		UserPoint userPoint = new UserPoint(1, 3000, System.currentTimeMillis());
+		long amount = userPoint.decreasePoint(1000);
+		assertThat(amount).isEqualTo(2000);
+	}
 }

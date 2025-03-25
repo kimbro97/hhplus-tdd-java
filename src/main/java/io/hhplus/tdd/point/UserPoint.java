@@ -10,6 +10,14 @@ public record UserPoint(
 		return new UserPoint(id, 0, System.currentTimeMillis());
 	}
 
+	public long increasePoint(long amount) {
+		return this.point + amount;
+	}
+
+	public long decreasePoint(long amount) {
+		return this.point - amount;
+	}
+
 	public void chargeValidate(long amount) {
 
 		if (amount <= 0) {
