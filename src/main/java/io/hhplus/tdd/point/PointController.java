@@ -49,7 +49,7 @@ public class PointController {
 		@PathVariable long id,
 		@RequestBody long amount
 	) {
-		return new UserPoint(0, 0, 0);
+		return pointService.chargePoint(id, amount);
 	}
 
 	/**

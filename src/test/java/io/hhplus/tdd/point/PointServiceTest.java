@@ -48,6 +48,31 @@ class PointServiceTest {
 		assertThat(pointHistory).hasSize(3);
 	}
 
+	@Test
+	void 충전포인트가_0이거나_0보다_작다면_예외가_발생한다() {
+
+		when(userPointTable.selectById(1L))
+			.thenReturn(new UserPoint(1, 4000, System.currentTimeMillis()));
+
+		assertThatThrownBy(() -> pointService.chargePoint(1, -1))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("충전 포인트는 0보다 커야합니다.");
+
+		assertThatThrownBy(() -> pointService.chargePoint(1, 0))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("충전 포인트는 0보다 커야합니다.");
+	}
+
+	@Test
+	void 충전포인트와_현재포인트의_합이_10000이상일때_예외가_발생한다() {
+		when(userPointTable.selectById(1L))
+			.thenReturn(new UserPoint(1, 4000, System.currentTimeMillis()));
+
+		assertThatThrownBy(() -> pointService.chargePoint(1, 6001))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("포인트는 10000원을 초과할 수 없습니다.");
+	}
+
 	private List<PointHistory> createPointHistoryList() {
 		return List.of(
 			new PointHistory(1, 1, 3000, TransactionType.CHARGE, System.currentTimeMillis()),
