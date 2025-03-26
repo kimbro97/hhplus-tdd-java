@@ -37,6 +37,7 @@ spring_boot_starter_data_jpa = { module = "org.springframework.boot:spring-boot-
 spring_boot_starter_actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 spring_boot_configuration_processor = { module = "org.springframework.boot:spring-boot-configuration-processor" }
 spring_boot_starter_test = { module = "org.springframework.boot:spring-boot-starter-test" }
+apache-httpclient = { module = "org.apache.httpcomponents.client5:httpclient5", version = "5.2.1" }
 
 spring_boot_testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
 test_containers_junit_jupiter = { module = "org.testcontainers:junit-jupiter" }
@@ -56,4 +57,4 @@ micrometer_registry_prometheus = { module = "io.micrometer:micrometer-registry-p
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 spring_mockk = { module = "com.ninja-squad:springmockk", version.ref = "spring_mockk" }
 [bundles]
-testcontainers_mysql = ["test_containers_mysql", "spring_boot_testcontainers", "test_containers_junit_jupiter","spring_boot_starter_test"]
+testcontainers_mysql = ["test_containers_mysql", "spring_boot_testcontainers", "test_containers_junit_jupiter", "spring_boot_starter_test"]
