@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.when;
@@ -21,6 +22,9 @@ class PointServiceUnitTest {
 
     @Mock
     private PointHistoryTable pointHistoryTable;
+
+    @Mock
+    private LockManager lockManager;
 
     @InjectMocks
     private PointService pointService;
@@ -52,6 +56,8 @@ class PointServiceUnitTest {
     @Test
     void charge_point_success() {
         // arrange
+        when(lockManager.getLock(1L)).thenReturn(new ReentrantLock(true));
+
         when(userPointTable.selectById(1L))
                 .thenReturn(new UserPoint(1, 3000, System.currentTimeMillis()));
 
@@ -68,6 +74,8 @@ class PointServiceUnitTest {
     @Test
     void use_point_success() {
         // arrange
+        when(lockManager.getLock(1L)).thenReturn(new ReentrantLock(true));
+
         when(userPointTable.selectById(1L))
                 .thenReturn(new UserPoint(1, 3000, System.currentTimeMillis()));
 
