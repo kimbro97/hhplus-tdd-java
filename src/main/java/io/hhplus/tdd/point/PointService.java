@@ -1,6 +1,7 @@
 package io.hhplus.tdd.point;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ public class PointService {
 
 	private final UserPointTable userPointTable;
 	private final PointHistoryTable pointHistoryTable;
+	private final LockManager lockManager;
 
 	public UserPoint getUserPoint(long id) {
 		return userPointTable.selectById(id);
@@ -24,28 +26,41 @@ public class PointService {
 	}
 
 	public UserPoint chargePoint(long userId, long amount) {
+		ReentrantLock lock = lockManager.getLock(userId);
 
-		UserPoint userPoint = userPointTable.selectById(userId);
+		lock.lock();
+		try {
+			UserPoint userPoint = userPointTable.selectById(userId);
 
-		userPoint.chargeValidate(amount);
+			userPoint.chargeValidate(amount);
 
-		userPoint = userPointTable.insertOrUpdate(userId, userPoint.increasePoint(amount));
+			userPoint = userPointTable.insertOrUpdate(userId, userPoint.increasePoint(amount));
 
-		pointHistoryTable.insert(userId, amount, TransactionType.CHARGE, System.currentTimeMillis());
+			pointHistoryTable.insert(userId, amount, TransactionType.CHARGE, System.currentTimeMillis());
 
-		return userPoint;
+			return userPoint;
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	public UserPoint usePoint(long userId, long amount) {
 
-		UserPoint userPoint = userPointTable.selectById(userId);
+		ReentrantLock lock = lockManager.getLock(userId);
 
-		userPoint.useValidate(amount);
+		lock.lock();
+		try {
+			UserPoint userPoint = userPointTable.selectById(userId);
 
-		userPoint = userPointTable.insertOrUpdate(userId, userPoint.decreasePoint(amount));
+			userPoint.useValidate(amount);
 
-		pointHistoryTable.insert(userId, amount, TransactionType.USE, System.currentTimeMillis());
+			userPoint = userPointTable.insertOrUpdate(userId, userPoint.decreasePoint(amount));
 
-		return userPoint;
+			pointHistoryTable.insert(userId, amount, TransactionType.USE, System.currentTimeMillis());
+
+			return userPoint;
+		} finally {
+			lock.unlock();
+		}
 	}
 }
