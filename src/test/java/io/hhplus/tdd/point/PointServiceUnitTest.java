@@ -2,6 +2,7 @@ package io.hhplus.tdd.point;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,10 +10,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.when;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PointServiceUnitTest {
@@ -56,7 +60,10 @@ class PointServiceUnitTest {
     @Test
     void charge_point_success() {
         // arrange
-        when(lockManager.getLock(1L)).thenReturn(new ReentrantLock(true));
+        when(lockManager.executeWithLock(eq(1L), any())).thenAnswer(invocation -> {
+            Supplier<UserPoint> supplier = invocation.getArgument(1);
+            return supplier.get();
+        });
 
         when(userPointTable.selectById(1L))
                 .thenReturn(new UserPoint(1, 3000, System.currentTimeMillis()));
@@ -74,7 +81,10 @@ class PointServiceUnitTest {
     @Test
     void use_point_success() {
         // arrange
-        when(lockManager.getLock(1L)).thenReturn(new ReentrantLock(true));
+        when(lockManager.executeWithLock(eq(1L), any())).thenAnswer(invocation -> {
+            Supplier<UserPoint> supplier = invocation.getArgument(1);
+            return supplier.get();
+        });
 
         when(userPointTable.selectById(1L))
                 .thenReturn(new UserPoint(1, 3000, System.currentTimeMillis()));
@@ -87,6 +97,50 @@ class PointServiceUnitTest {
 
         // assert
         assertThat(userPoint.point()).isEqualTo(1000);
+    }
+
+    @Test
+    @DisplayName("충전 금액을 0으로 받으면 insertOrUpdate 메소드는 실행되지 않는다")
+    void chargePoint_withZeroAmount_doesNotCallInsertOrUpdate() {
+        // arrange
+        when(lockManager.executeWithLock(eq(1L), any())).thenAnswer(invocation -> {
+            Supplier<UserPoint> supplier = invocation.getArgument(1);
+            return supplier.get();
+        });
+
+        when(userPointTable.selectById(1L))
+                .thenReturn(new UserPoint(1, 3000, System.currentTimeMillis()));
+
+        // act
+        assertThatThrownBy(() -> {
+            pointService.chargePoint(1L, 0);
+        }).isInstanceOf(IllegalArgumentException.class);
+
+        // assert
+        verify(userPointTable, times(0)).insertOrUpdate(1L, 0);
+        verify(pointHistoryTable, times(0)).insert(1L, 0, TransactionType.CHARGE, System.currentTimeMillis());
+    }
+
+    @Test
+    @DisplayName("충전 금액과 보유 금액이 10000원 이상이면 insertOrUpdate, insert 메소드는 실행되지 않는다")
+    void should_not_execute_insertOrUpdate_if_amount_exceeds_limit() {
+        // arrange
+        when(lockManager.executeWithLock(eq(1L), any())).thenAnswer(invocation -> {
+            Supplier<UserPoint> supplier = invocation.getArgument(1);
+            return supplier.get();
+        });
+
+        when(userPointTable.selectById(1L))
+                .thenReturn(new UserPoint(1, 3000, System.currentTimeMillis()));
+
+        // act
+        assertThatThrownBy(() -> {
+            pointService.chargePoint(1L, 7001);
+        }).isInstanceOf(IllegalArgumentException.class);
+
+        // assert
+        verify(userPointTable, times(0)).insertOrUpdate(1L, 7001);
+        verify(pointHistoryTable, times(0)).insert(1L, 7001, TransactionType.CHARGE, System.currentTimeMillis());
     }
 
     private List<PointHistory> createPointHistoryList() {
