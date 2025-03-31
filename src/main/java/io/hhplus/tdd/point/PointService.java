@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @RequiredArgsConstructor
@@ -25,10 +24,8 @@ public class PointService {
     }
 
     public UserPoint chargePoint(long userId, long amount) {
-        ReentrantLock lock = lockManager.getLock(userId);
 
-        lock.lock();
-        try {
+        return lockManager.executeWithLock(userId, () -> {
             UserPoint userPoint = userPointTable.selectById(userId);
 
             long point = userPoint.charge(amount);
@@ -38,17 +35,13 @@ public class PointService {
             pointHistoryTable.insert(userId, amount, TransactionType.CHARGE, System.currentTimeMillis());
 
             return userPoint;
-        } finally {
-            lock.unlock();
-        }
+        });
+
     }
 
     public UserPoint usePoint(long userId, long amount) {
 
-        ReentrantLock lock = lockManager.getLock(userId);
-
-        lock.lock();
-        try {
+        return lockManager.executeWithLock(userId, () -> {
             UserPoint userPoint = userPointTable.selectById(userId);
 
             long point = userPoint.use(amount);
@@ -58,8 +51,7 @@ public class PointService {
             pointHistoryTable.insert(userId, amount, TransactionType.USE, System.currentTimeMillis());
 
             return userPoint;
-        } finally {
-            lock.unlock();
-        }
+        });
+
     }
 }
