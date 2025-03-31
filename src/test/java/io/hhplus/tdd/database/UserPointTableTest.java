@@ -23,7 +23,7 @@ class UserPointTableTest {
     void decrease_test() {
         UserPoint userPoint = userPointTable.insertOrUpdate(1, 3000);
 
-        userPoint = userPointTable.insertOrUpdate(1, userPoint.decreasePoint(2000));
+        userPoint = userPointTable.insertOrUpdate(1, userPoint.use(2000));
 
         assertThat(userPoint.point()).isEqualTo(1000);
     }
